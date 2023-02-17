@@ -27,7 +27,7 @@ app.get("/catalogo", async (req,res)=>{
 
 app.get("/catalogo/:id", async(req,res)=>{
     const product = await manager.getProductByID(parseInt(req.params.id))
-    product === null ? res.send("Producto inexistente"): res.send(product)
+    res.send(product)
 });
 
 app.listen(PORT,()=>{

@@ -12,20 +12,10 @@ class Product{
         this.id = Product.addId()
     }
 
-    static addId(){
-        if(this.idIncrement){
-            this.idIncrement++
-        }else{
-            this.idIncrement = 1
-        }
-        return this.idIncrement
-    
-    }
 }
 
 
 class ProductManager{
-    static newId = 0
     constructor(path){
         this.path = path
     }
@@ -43,12 +33,10 @@ class ProductManager{
                 if(valid.includes(null)||valid.includes("")||valid.includes(undefined)){
                     console.log("Todos los campos deben estar completos");
                 }else{
-                    let id;
-                    id = data.length + 1;
+                    let id = data.length + 1;
                     let nuevoProducto = new Product(titulo, descripcion, precio, imagen, stock, code, id);
                     data.push(nuevoProducto);
                     await fs.writeFile(this.path, JSON.stringify(data), "utf-8");
-
                 }
             }
         }catch (error){
@@ -60,25 +48,42 @@ class ProductManager{
     async getProducts() {
         try {
         const read = await fs.readFile(this.path, "utf8");
-        console.log(JSON.parse(read)); 
+        return (JSON.parse(read)); 
         } catch (error) {
         throw error;
         }
     }
 
-    async getProductById(id){
-        try{
-            const read = await fs.readFile(this.path, "utf-8");
-            const data = JSON.parse(read);
-            const buscarProduct = data.find((buscarProduct) => buscarProduct.id === id)
-        if(buscarProduct){
-            console.log(buscarProduct)
-        }else{
-            console.log("No se encontro el producto")
+    async getProductByID(id) {
+        try {
+        const read = await fs.readFile(this.path, "utf-8");
+        const data = JSON.parse(read);
+        const product = data.find((product) => product.id === id);
+        if (product) {
+            return (product);
+        } else {
+            return ("El id seleccionado no corresponde a ninguno de nuestros productos");
         }
-        }catch(error){
-        throw error
-        }   
+        } catch (error) {
+        throw error;
+        }
+    }
+
+    async updateProduct(id, titulo, descripcion, precio, imagen, stock, code) {
+        const read = await fs.readFile(this.path, "utf-8");
+        const data = JSON.parse(read);
+        if (data.some(producto => producto.id === id)){
+            let indice = data.findIndex(producto => producto.id === id)
+            data[indice].title      = titulo
+            data[indice].description= descripcion
+            data[indice].price      = precio
+            data[indice].thumbnail  = imagen 
+            data[indice].code       = code
+            data[indice].stock      = stock
+            await fs.writeFile(this.path, JSON.stringify(data), "utf-8");
+        }else{
+            return "producto no encontrado";
+        }
     }
     
     async deleteProduct(id) {
@@ -86,7 +91,7 @@ class ProductManager{
         const read = await fs.readFile(this.path, "utf-8");
         const data = JSON.parse(read);
         const newData = data.filter((product) => product.id !== id);
-        await fs.writeFile(this.path, JSON.stringify(newData), "utf-8");
+            await fs.writeFile(this.path, JSON.stringify(newData), "utf-8");
         return console.log("Producto eliminado");
         } catch (error) {
         throw error;
@@ -95,54 +100,4 @@ class ProductManager{
 
 }
 
-const producto1 = new ProductManager("./productos.json")
-
-/*console.log(producto1)
-
-//agrego un producto con todos los campos completos
-producto1.addProduct({
-    title: "Frutilla suave",
-    description: "Sillón",
-    price: 35000,
-    thumbnail:  "https://firebasestorage.googleapis.com/v0/b/nube-lila.appspot.com/o/sirosa.png?alt=media&token=76bd52f6-874b-4def-9c42-767d6fcee391", //ruta
-    code: 4,
-    stock: 4
-})
-
-
-//faltan completar campos
-producto1.addProduct({
-    title: "Amor por los flamencos",
-    description: " ",
-    price: " ",
-    thumbnail: "https://firebasestorage.googleapis.com/v0/b/nube-lila.appspot.com/o/flamencos.png?alt=media&token=2a4551be-53f3-4663-926d-4b0e1e669a46",
-    code: 32,
-    stock: 5
-})
-
-
-//distinto producto pero mismo code
-producto1.addProduct({
-    title: "Velas de amor",
-    description: "Deco navideña",
-    price: 1200,
-    thumbnail: "https://firebasestorage.googleapis.com/v0/b/nube-lila.appspot.com/o/velas.png?alt=media&token=a9eb87db-e00c-48e8-8652-761d0420b275",
-    code: 22,
-    stock: 10
-})
-
-producto1.addProduct({
-    title: "Puffs divertidos",
-    description: "Set de puffs",
-    price: 15000,
-    thumbnail: "https://firebasestorage.googleapis.com/v0/b/nube-lila.appspot.com/o/setpuffs.png?alt=media&token=cdff7e6e-fa93-41b2-bdf8-7047a9f3ee11",
-    code: 22,
-    stock: 15
-})
-
-console.log(producto1)*/
-
-producto1.getProductById(1)
-producto1.getProductById(2)
-producto1.getProductById(3)
-
+export default ProductManager

@@ -8,14 +8,13 @@ class Cart {
     }
 }
 
-export class CartManager{
-    constructor(path){
+export class CartManager {
+    constructor(path) {
         this.path = path
     }
-}
-
-    checkJson =() => {
-    !existsSync(this.path) && fs.writeFile(this.path, "[]", 'utf-8'); }//Creamos archivo JSON.
+    checkJson = () => {
+        !existsSync(this.path) && fs.writeFile(this.path, "[]", 'utf-8'); //Creo archivo JSON de carrito
+    }
 
 addCart = async () => {
     this.checkJson()
@@ -32,7 +31,6 @@ addCart = async () => {
     } catch {
         return "Error al crear el carrito."
     }
-
 }
 
 getCartById = async (idCart) => {
@@ -107,13 +105,12 @@ deleteProductFromCart = async (idCart, idProduct) => {
         } else {
             return "El producto no existe en el carrito y no pudo ser eliminado."
         }
-        //Escribimos el Json del carrito con el producto nuevo
-        await fs.writeFile(this.path, JSON.stringify(carts), 'utf-8')
+        await fs.writeFile(this.path, JSON.stringify(carts), 'utf-8') //Escribimos el Json del carrito con el producto nuevo
         return "Producto eliminado del carrito"
     } else {
         return "Hubo un error al eliminar el producto del carrito."
+        }
     }
+
 }
-
-
 

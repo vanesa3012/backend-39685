@@ -6,11 +6,18 @@ const routerProduct = Router()
 const productManager = new ProductManager('src/models/productos.json')
 
 routerProduct.get('/', async (req, res) => { 
-    const { limit } = req.query; 
+    const products = await productManager.getProducts();
+    let limit  =parseInt(req.query.limit);
+    let data;
     console.log(limit)
-    const productos = await productManager.getProducts()
-    console.log(productos)
-    res.send(JSON.stringify(productos))
+    if (limit) {
+        if(limit < 0 || limit > products.length){
+            data=`el limite debe ser un numero positivo y menor al numero ${products.length}`
+        }else{data = products.slice(0, limit);}
+    } else {
+        data = products;
+    }
+    res.send(data);
 })
 
 routerProduct.get('/:id', async (req, res) => { 

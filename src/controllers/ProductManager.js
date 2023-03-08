@@ -2,24 +2,15 @@
 import {promises as fs} from 'fs'
 
 class Product {
-    constructor(title, description, price, code, stock, category, status, thumbnail) {
-        this.id = Product.addId()
+    constructor(title, description, price, thumbnail, stock, code, id) {
         this.title = title;
         this.description = description;
         this.price = price;
-        this.code = code;
-        this.stock = stock;
-        this.category = category;
-        this.status = status;
         this.thumbnail = thumbnail;
-    }
-    static addId(){
-        if (this.idIncrement) {
-            this.idIncrement++
-        } else {
-            this.idIncrement = 1
-        }
-        return this.idIncrement
+        this.code = code;
+        this.id = id;
+        this.stock = stock;
+        this.status = true
     }
 }
 
@@ -28,40 +19,38 @@ export class ProductManager {
         this.path = path
     }
 
-    addProduct = async (product,imgPath) => {
-        //Validar que todos los campos sean completados que la propiedad "code" no esté repetida.
-        const read = await fs.readFile(this.path, 'utf-8');
-        const data = JSON.parse(read);
-        const prodCode = data.map((prod) => prod.code);
-        const prodExist = prodCode.includes(product.code); 
-        if (prodExist) {
-            return console.log (`El código ${product.code} ya existe. Ingrese uno diferente.`)
-        } else if (Object.values(product).includes("") || Object.values(product).includes(null)) {
-            return console.log("Todos los campos deben ser completados.");
-        } else {
-            if (imgPath) {
-                product.thumbnail = imgPath; 
-            } else {
-                imgPath = []
-                product.thumbnail = imgPath;
+    async addProduct (title, description, price, thumbnail, stock, code) {
+        try{
+            let valid  = [title, description, price, stock, code]
+            const read = await fs.readFile(this.path, "utf8");
+            const data = JSON.parse(read);
+            const objCode = data.find((product) => product.code == code);
+            let id
+
+            if(objCode){
+                throw error;
+            }else{
+                if(valid.includes(null) || valid.includes("") || valid.includes(undefined)){
+                    console.log("Todos los campos deben estar completos");
+                }else{
+                    data.length > 0 ? id=data[parseInt(data.length) - 1].id + 1 : id = 1
+                    let nuevoProducto = new Product(title, description, price, thumbnail ?? "sin img", stock, code,id);
+                    data.push(nuevoProducto);
+                    await fs.writeFile(this.path, JSON.stringify(data), "utf-8");
+                    return (`El Producto: ${nuevoProducto} se creo con exito`)
+
+                }
             }
-        let newId;
-        !data.length ? (newId = 1) : (newId = data[data.length - 1].id + 1);
-        const nuevoProducto = {id: newId, ...product};
-        data.push(nuevoProducto);
-        await fs.writeFile(this.path, JSON.stringify(data), 'utf-8')
-        console.log(`El producto con id: ${nuevoProducto.id} ha sido agregado.`)
-            return newId
-            }
-        }
+        }catch (error){
+            console.log("El code del producto ya se encuentra en uso" + error);
+        };
+    }
 
         getProducts = async () => {
             try {
                 const read = await fs.readFile(this.path, 'utf-8')
                 const prods = await JSON.parse(read)
                 if (prods.length != 0) {
-                    console.log("Listado de productos:");
-                    console.log(prods);
                     return prods
                 } 
             } catch {
